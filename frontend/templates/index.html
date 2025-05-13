@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>🏠 챗사무장 - 부동산 경매 분석</title>
+  <style>
+    body {
+      font-family: 'Malgun Gothic', sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    input, button {
+      font-size: 16px;
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+    }
+    #result, #chatBox {
+      white-space: pre-wrap;
+      background: #f8f8f8;
+      padding: 20px;
+      border-radius: 6px;
+      margin-top: 20px;
+      min-height: 100px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 챗사무장</h1>
+  <p>대법원 경매 사이트에서 저장한 HTML 파일을 업로드하세요.</p>
+
+  <!-- 📁 HTML 업로드 -->
+  <form id="uploadForm">
+    <input type="file" id="htmlFile" accept=".html" />
+    <button type="submit">🔍 분석 요청</button>
+  </form>
+
+  <div id="result">📄 분석 결과가 여기에 표시됩니다.</div>
+
+  <!-- 💬 사용자 질문창 -->
+  <h2>💬 분석 결과에 대해 GPT에게 질문하기</h2>
+  <input type="text" id="question" placeholder="궁금한 점을 입력하세요" />
+  <button onclick="askQuestion()">질문하기</button>
+
+  <div id="chatBox">🤖 GPT의 답변이 여기에 표시됩니다.</div>
+
+  <script>
+    let lastAnalysisResult = "";  // 분석 결과를 기억해서 질문 시 전달용
+
+    // HTML 업로드 처리
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const file = document.getElementById("htmlFile").files[0];
+      const resultBox = document.getElementById("result");
+
+      if (!file) {
+        alert("HTML 파일을 선택해주세요.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      resultBox.textContent = "⏳ 분석 중입니다...";
+
+      try {
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        const formatted = JSON.stringify(data, null, 2);
+        lastAnalysisResult = formatted;
+        resultBox.textContent = formatted;
+      } catch (err) {
+        resultBox.textContent = "❌ 분석 실패: " + err.message;
+      }
+    });
+
+    // 질문 기능 처리
+    async function askQuestion() {
+      const question = document.getElementById("question").value.trim();
+      const chatBox = document.getElementById("chatBox");
+
+      if (!lastAnalysisResult) {
+        alert("먼저 HTML 파일을 업로드해 분석을 완료해주세요.");
+        return;
+      }
+      if (!question) {
+        alert("질문을 입력해주세요.");
+        return;
+      }
+
+      chatBox.textContent = "🤔 GPT에게 질문 중...";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            analysis: lastAnalysisResult,
+            question: question
+          })
+        });
+
+        const data = await res.json();
+        chatBox.textContent = data.answer;
+      } catch (err) {
+        chatBox.textContent = "❌ 질문 처리 실패: " + err.message;
+      }
+    }
+  </script>
+</body>
+</html>
