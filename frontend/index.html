@@ -35,7 +35,7 @@
 
   <!-- 📁 HTML 업로드 -->
   <form id="uploadForm">
-    <input type="file" id="htmlFile" accept=".html" />
+    <input type="file" id="htmlFile" accept=".html" multiple />
     <button type="submit">🔍 분석 요청</button>
   </form>
 
@@ -114,6 +114,37 @@
         chatBox.textContent = "❌ 질문 처리 실패: " + err.message;
       }
     }
+ <script>
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const files = document.getElementById("htmlFiles").files;
+      const resultBox = document.getElementById("result");
+
+      if (files.length !== 2) {
+        alert("상세페이지 HTML과 매각물건명세서 HTML 총 2개를 선택해주세요.");
+        return;
+      }
+
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("file", file);
+      }
+
+      resultBox.textContent = "⏳ 분석 중입니다...";
+
+      try {
+        const res = await fetch("https://chat-samujang-v2.onrender.com/api/analyze", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+        resultBox.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        resultBox.textContent = "❌ 분석 실패: " + err.message;
+      }
+    });
   </script>
 </body>
 </html>
