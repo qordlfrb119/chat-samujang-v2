@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-CORS(app, resources={r"/api/*": {"origins": "*"}})
 from bs4 import BeautifulSoup
 import openai
 import os
 
 app = Flask(__name__, template_folder="../frontend/templates", static_folder="../frontend/static")
+
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
