@@ -68,7 +68,7 @@
       resultBox.textContent = "⏳ 분석 중입니다...";
 
       try {
-        const res = await fetch("/api/analyze", {
+        const res = await fetch("https://chat-samujang-v2.onrender.com/api/analyze", {
           method: "POST",
           body: formData
         });
@@ -99,7 +99,7 @@
       chatBox.textContent = "🤔 GPT에게 질문 중...";
 
       try {
-        const res = await fetch("/api/chat", {
+        const res = await fetch("https://chat-samujang-v2.onrender.com/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
